@@ -354,11 +354,11 @@ export default function Home() {
                         </div>
                         <div className="footer-members">
                             {MEMBERS_CONFIG.map(m => (
-                                <a key={m.username} href={`/member/${m.username}`} className="footer-member-link"
+                                <Link key={m.username} to={`/member/${m.username}`} className="footer-member-link"
                                     style={{ '--hover-color': m.secondary }}
                                 >
                                     {m.column}
-                                </a>
+                                </Link>
                             ))}
                         </div>
                         <div className="footer-credit">
