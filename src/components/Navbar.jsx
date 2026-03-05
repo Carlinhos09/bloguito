@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false)
+    const [menuOpen, setMenuOpen] = useState(false)
     const { member, logout } = useAuth()
     const navigate = useNavigate()
 
@@ -15,30 +16,41 @@ export default function Navbar() {
 
     const handleLogout = () => {
         logout()
+        setMenuOpen(false)
         navigate('/')
     }
 
     return (
-        <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+        <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${menuOpen ? 'menu-open' : ''}`}>
             <div className="container">
                 <div className="navbar-inner">
-                    <Link to="/" className="navbar-logo">
+                    <Link to="/" className="navbar-logo" onClick={() => setMenuOpen(false)}>
                         <span className="logo-storm">Tempestade</span>
                         <span> Digital</span>
                     </Link>
 
-                    <div className="navbar-links">
-                        <Link to="/member/triz" className="navbar-link">Modo Criativo</Link>
-                        <Link to="/member/eduardo" className="navbar-link">Entre Frames</Link>
-                        <Link to="/member/sophia" className="navbar-link">Drop</Link>
-                        <Link to="/member/clarisse" className="navbar-link">Episódio Zero</Link>
+                    <button
+                        className="mobile-toggle"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        aria-label="Menu"
+                    >
+                        <div className="bar"></div>
+                        <div className="bar"></div>
+                        <div className="bar"></div>
+                    </button>
+
+                    <div className={`navbar-links ${menuOpen ? 'active' : ''}`}>
+                        <Link to="/member/triz" className="navbar-link" onClick={() => setMenuOpen(false)}>Modo Criativo</Link>
+                        <Link to="/member/eduardo" className="navbar-link" onClick={() => setMenuOpen(false)}>Entre Frames</Link>
+                        <Link to="/member/sophia" className="navbar-link" onClick={() => setMenuOpen(false)}>Drop</Link>
+                        <Link to="/member/clarisse" className="navbar-link" onClick={() => setMenuOpen(false)}>Episódio Zero</Link>
                         {member ? (
                             <>
-                                <Link to="/dashboard" className="navbar-link admin-btn">⚡ Dashboard</Link>
+                                <Link to="/dashboard" className="navbar-link admin-btn" onClick={() => setMenuOpen(false)}>⚡ Dashboard</Link>
                                 <button className="navbar-link" onClick={handleLogout} style={{ cursor: 'pointer' }}>Sair</button>
                             </>
                         ) : (
-                            <Link to="/login" className="navbar-link admin-btn">Admin</Link>
+                            <Link to="/login" className="navbar-link admin-btn" onClick={() => setMenuOpen(false)}>Admin</Link>
                         )}
                     </div>
                 </div>

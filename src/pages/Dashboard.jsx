@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { motion } from 'framer-motion'
 import Navbar from '../components/Navbar'
 
 export default function Dashboard() {
