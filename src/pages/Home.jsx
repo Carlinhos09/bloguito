@@ -362,7 +362,7 @@ export default function Home() {
                             ))}
                         </div>
                         <div className="footer-credit">
-                            Blog universitário 2025/2026 ⚡<br />
+                            Blog universitário ⚡<br />
                             <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>Feito com intensidade</span>
                         </div>
                     </div>
