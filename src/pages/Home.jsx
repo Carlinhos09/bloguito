@@ -73,10 +73,12 @@ export { MEMBERS_CONFIG }
 export default function Home() {
     const navigate = useNavigate()
     const [latestPosts, setLatestPosts] = useState([])
+    const [dbMembers, setDbMembers] = useState([])
     const [loadingPosts, setLoadingPosts] = useState(true)
 
     useEffect(() => {
         fetchLatestPosts()
+        fetchMembers()
         // Scroll reveal
         const observer = new IntersectionObserver(
             (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
@@ -85,6 +87,15 @@ export default function Home() {
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
         return () => observer.disconnect()
     }, [])
+
+    async function fetchMembers() {
+        try {
+            const { data } = await supabase.from('members').select('*')
+            if (data) setDbMembers(data)
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     async function fetchLatestPosts() {
         try {
@@ -223,45 +234,57 @@ export default function Home() {
                     </div>
 
                     <div className="members-grid">
-                        {MEMBERS_CONFIG.map((member, i) => (
-                            <motion.div
-                                key={member.username}
-                                className="member-card reveal"
-                                style={{
-                                    '--member-gradient': member.cardGradient,
-                                    '--member-gradient-hover': member.cardGradientHover,
-                                    '--member-border': `${member.primary}33`,
-                                    '--member-border-hover': `${member.primary}88`,
-                                    '--member-glow': member.glow,
-                                    '--member-bg': member.bgGradient,
-                                    '--member-accent': member.primary,
-                                    '--member-accent-text': member.secondary,
-                                }}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: '-60px' }}
-                                transition={{ delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                                onClick={() => navigate(`/member/${member.username}`)}
-                            >
-                                <div className="member-card-bg" style={{ background: member.bgGradient }} />
-                                <span className="member-glyph">{member.glyph}</span>
+                        {MEMBERS_CONFIG.map((mc, i) => {
+                            const dbm = dbMembers.find(d => d.username === mc.username)
+                            const displayAuthor = dbm?.author_name || mc.author
+                            const displayCodename = dbm?.codename || mc.codename
+                            const displayAvatar = dbm?.avatar_url
 
-                                <div className="member-card-content">
-                                    <span
-                                        className="member-column-tag"
-                                        style={{ borderColor: `${member.primary}88`, color: member.secondary }}
-                                    >
-                                        {member.column}
-                                    </span>
-                                    <h3 className="member-codename">{member.codename}</h3>
-                                    <p className="member-author">por {member.author}</p>
-                                    <div className="member-niche" style={{ color: member.secondary }}>
-                                        {member.niche}
+                            return (
+                                <motion.div
+                                    key={mc.username}
+                                    className="member-card reveal"
+                                    style={{
+                                        '--member-gradient': mc.cardGradient,
+                                        '--member-gradient-hover': mc.cardGradientHover,
+                                        '--member-border': `${mc.primary}33`,
+                                        '--member-border-hover': `${mc.primary}88`,
+                                        '--member-glow': mc.glow,
+                                        '--member-bg': mc.bgGradient,
+                                        '--member-accent': mc.primary,
+                                        '--member-accent-text': mc.secondary,
+                                    }}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: '-60px' }}
+                                    transition={{ delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                                    onClick={() => navigate(`/member/${mc.username}`)}
+                                >
+                                    <div className="member-card-bg" style={{ background: mc.bgGradient }} />
+
+                                    {displayAvatar ? (
+                                        <img src={displayAvatar} alt={displayAuthor} className="member-image-destaque" />
+                                    ) : (
+                                        <span className="member-glyph">{mc.glyph}</span>
+                                    )}
+
+                                    <div className="member-card-content">
+                                        <span
+                                            className="member-column-tag"
+                                            style={{ borderColor: `${mc.primary}88`, color: mc.secondary }}
+                                        >
+                                            {mc.column}
+                                        </span>
+                                        <h3 className="member-codename">{displayCodename}</h3>
+                                        <p className="member-author">por {displayAuthor}</p>
+                                        <div className="member-niche" style={{ color: mc.secondary }}>
+                                            {mc.niche}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="member-arrow">→</div>
-                            </motion.div>
-                        ))}
+                                    <div className="member-arrow">→</div>
+                                </motion.div>
+                            )
+                        })}
                     </div>
                 </div>
             </section>
