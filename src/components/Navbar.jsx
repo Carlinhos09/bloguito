@@ -30,12 +30,19 @@ function SettingsModal({ isOpen, onClose }) {
         }
     }
 
+    const handleRemoveAvatar = () => {
+        setAvatarFile(null)
+        setAvatarPreview('')
+    }
+
     const handleSave = async (e) => {
         e.preventDefault()
         setUploading(true)
 
         try {
-            let avatarUrl = member.avatar_url
+            // Se o preview estiver vazio, o usuário removeu a foto.
+            // Caso contrário, mantemos a URL atual (ou a nova se houver upload).
+            let avatarUrl = avatarPreview === '' ? '' : (member.avatar_url || '')
 
             if (avatarFile) {
                 const fileExt = avatarFile.name.split('.').pop()
@@ -117,6 +124,15 @@ function SettingsModal({ isOpen, onClose }) {
                             onChange={handleFileChange}
                             style={{ display: 'none' }}
                         />
+                        {avatarPreview && (
+                            <button
+                                type="button"
+                                className="btn-remove-avatar"
+                                onClick={handleRemoveAvatar}
+                            >
+                                Remover Foto
+                            </button>
+                        )}
                         <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
                     </div>
 
