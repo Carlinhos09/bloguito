@@ -165,7 +165,7 @@ export default function Home() {
                         transition={{ delay: 0.7, duration: 0.6 }}
                     >
                         <button className="btn-primary" onClick={() => document.getElementById('members').scrollIntoView({ behavior: 'smooth' })}>
-                            <span>Quem somos nós? ↓</span>
+                            <span>Quem somos nós ↓</span>
                         </button>
                         <button className="btn-secondary" onClick={() => document.getElementById('posts').scrollIntoView({ behavior: 'smooth' })}>
                             Últimos Posts

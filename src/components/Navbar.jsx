@@ -325,6 +325,20 @@ export default function Navbar() {
                         </button>
 
                         <div className={`navbar-links ${menuOpen ? 'active' : ''}`}>
+                            <a
+                                href="/#members"
+                                className="navbar-link"
+                                onClick={(e) => {
+                                    if (window.location.pathname === '/') {
+                                        e.preventDefault();
+                                        const el = document.getElementById('members');
+                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                    setMenuOpen(false);
+                                }}
+                            >
+                                Quem Somos Nós
+                            </a>
                             <Link to="/member/triz" className="navbar-link" onClick={() => setMenuOpen(false)}>Modo Criativo</Link>
                             <Link to="/member/eduardo" className="navbar-link" onClick={() => setMenuOpen(false)}>Entre Frames</Link>
                             <Link to="/member/sophia" className="navbar-link" onClick={() => setMenuOpen(false)}>Drop</Link>
