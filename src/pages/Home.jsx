@@ -267,10 +267,6 @@ export default function Home() {
                                             src={displayAvatar}
                                             alt={displayAuthor}
                                             className="member-image-destaque"
-                                            style={{
-                                                objectPosition: `center ${dbm?.avatar_pos_y ?? 50}%`,
-                                                transform: `scale(${dbm?.avatar_scale ?? 1.0})`
-                                            }}
                                         />
                                     ) : (
                                         <span className="member-glyph">{mc.glyph}</span>

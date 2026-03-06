@@ -72,9 +72,7 @@ export default function PostDetail() {
                                 style={{
                                     width: '100%',
                                     height: '100%',
-                                    objectFit: 'cover',
-                                    objectPosition: `center ${post.members.avatar_pos_y ?? 50}%`,
-                                    transform: `scale(${post.members.avatar_scale ?? 1.0})`
+                                    objectFit: 'cover'
                                 }}
                             />
                         ) : (

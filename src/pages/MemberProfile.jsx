@@ -79,8 +79,6 @@ export default function MemberProfile() {
                                 width: '100%',
                                 height: '100%',
                                 objectFit: 'cover',
-                                objectPosition: `center ${memberInfo.avatar_pos_y ?? 50}%`,
-                                transform: `scale(${memberInfo.avatar_scale ?? 1.0})`,
                                 opacity: 0.5
                             }}
                         />

@@ -3,17 +3,21 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-
+import Cropper from 'react-easy-crop'
+import getCroppedImg from '../utils/cropImage'
 function SettingsModal({ isOpen, onClose }) {
     const { member, updateMember } = useAuth()
     const [authorName, setAuthorName] = useState(member?.author_name || '')
     const [codename, setCodename] = useState(member?.codename || '')
     const [bio, setBio] = useState(member?.bio || '')
-    const [avatarPosY, setAvatarPosY] = useState(member?.avatar_pos_y || 50)
-    const [avatarScale, setAvatarScale] = useState(member?.avatar_scale || 1.0)
     const [uploading, setUploading] = useState(false)
     const [avatarFile, setAvatarFile] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState(member?.avatar_url || '')
+    const [imageSrc, setImageSrc] = useState(null)
+    const [crop, setCrop] = useState({ x: 0, y: 0 })
+    const [zoom, setZoom] = useState(1)
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+    const [isCropping, setIsCropping] = useState(false)
 
     useEffect(() => {
         if (member) {
@@ -21,17 +25,43 @@ function SettingsModal({ isOpen, onClose }) {
             setCodename(member.codename)
             setBio(member.bio || '')
             setAvatarPreview(member.avatar_url || '')
-            setAvatarPosY(member.avatar_pos_y || 50)
-            setAvatarScale(member.avatar_scale || 1.0)
         }
     }, [member, isOpen])
 
     const handleFileChange = (e) => {
         const file = e.target.files[0]
         if (file) {
-            setAvatarFile(file)
-            setAvatarPreview(URL.createObjectURL(file))
+            const reader = new FileReader()
+            reader.onload = () => {
+                setImageSrc(reader.result)
+                setIsCropping(true)
+                setCrop({ x: 0, y: 0 })
+                setZoom(1)
+            }
+            reader.readAsDataURL(file)
         }
+    }
+
+    const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels)
+    }
+
+    const handleConfirmCrop = async () => {
+        try {
+            const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels)
+            setAvatarFile(croppedImageBlob)
+            setAvatarPreview(URL.createObjectURL(croppedImageBlob))
+            setIsCropping(false)
+            setImageSrc(null)
+        } catch (e) {
+            console.error(e)
+            alert("Erro ao recortar imagem")
+        }
+    }
+
+    const handleCancelCrop = () => {
+        setIsCropping(false)
+        setImageSrc(null)
     }
 
     const handleRemoveAvatar = () => {
@@ -72,9 +102,7 @@ function SettingsModal({ isOpen, onClose }) {
                     author_name: authorName,
                     codename: codename,
                     bio: bio,
-                    avatar_url: avatarUrl,
-                    avatar_pos_y: avatarPosY,
-                    avatar_scale: avatarScale
+                    avatar_url: avatarUrl
                 })
                 .eq('id', member.id)
 
@@ -84,9 +112,7 @@ function SettingsModal({ isOpen, onClose }) {
                 author_name: authorName,
                 codename: codename,
                 bio: bio,
-                avatar_url: avatarUrl,
-                avatar_pos_y: avatarPosY,
-                avatar_scale: avatarScale
+                avatar_url: avatarUrl
             })
 
             onClose()
@@ -109,114 +135,106 @@ function SettingsModal({ isOpen, onClose }) {
                 animate={{ opacity: 1, scale: 1 }}
             >
                 <div className="modal-header">
-                    <h2 className="modal-title">Configurações de Perfil</h2>
+                    <h2 className="modal-title">{isCropping ? 'Ajustar Foto' : 'Configurações de Perfil'}</h2>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
-                <form onSubmit={handleSave} className="modal-body">
-                    <div className="avatar-upload-section">
-                        <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary }}>
-                            {avatarPreview ? (
-                                <img
-                                    src={avatarPreview}
-                                    alt="Preview"
-                                    className="avatar-preview-img"
-                                    style={{
-                                        objectPosition: `center ${avatarPosY}%`,
-                                        transform: `scale(${avatarScale})`
-                                    }}
-                                />
-                            ) : (
-                                <span className="avatar-preview-placeholder">👤</span>
-                            )}
-                            <label htmlFor="avatar-input" className="avatar-upload-label">
-                                📷
-                            </label>
+                {isCropping ? (
+                    <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', height: '500px' }}>
+                        <div style={{ position: 'relative', flex: 1, background: '#111', borderRadius: '8px', overflow: 'hidden' }}>
+                            <Cropper
+                                image={imageSrc}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={4 / 3}
+                                onCropChange={setCrop}
+                                onCropComplete={onCropComplete}
+                                onZoomChange={setZoom}
+                            />
                         </div>
-                        <input
-                            id="avatar-input"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                        />
-                        {avatarPreview && (
-                            <div className="avatar-position-control">
-                                <div className="slider-group">
-                                    <label className="form-label">Ajuste Vertical: {avatarPosY}%</label>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        value={avatarPosY}
-                                        onChange={(e) => setAvatarPosY(parseInt(e.target.value))}
-                                        className="position-slider"
+                        <div className="modal-footer" style={{ marginTop: '20px' }}>
+                            <button type="button" className="btn-cancel" onClick={handleCancelCrop}>Cancelar</button>
+                            <button type="button" className="btn-save" onClick={handleConfirmCrop}>Confirmar Recorte</button>
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSave} className="modal-body">
+                        <div className="avatar-upload-section">
+                            <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary }}>
+                                {avatarPreview ? (
+                                    <img
+                                        src={avatarPreview}
+                                        alt="Preview"
+                                        className="avatar-preview-img"
                                     />
-                                </div>
-                                <div className="slider-group">
-                                    <label className="form-label">Zoom/Escala: {avatarScale}x</label>
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="3"
-                                        step="0.1"
-                                        value={avatarScale}
-                                        onChange={(e) => setAvatarScale(parseFloat(e.target.value))}
-                                        className="position-slider"
-                                    />
-                                </div>
+                                ) : (
+                                    <span className="avatar-preview-placeholder">👤</span>
+                                )}
+                                <label htmlFor="avatar-input" className="avatar-upload-label">
+                                    📷
+                                </label>
+                            </div>
+                            <input
+                                id="avatar-input"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                            {avatarPreview && (
                                 <button
                                     type="button"
                                     className="btn-remove-avatar"
+                                    style={{ marginTop: '16px', display: 'block', width: '100%' }}
                                     onClick={handleRemoveAvatar}
                                 >
                                     Remover Foto
                                 </button>
+                            )}
+                            <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label className="form-label">Nome do Autor</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={authorName}
+                                    onChange={e => setAuthorName(e.target.value)}
+                                    required
+                                />
                             </div>
-                        )}
-                        <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
-                    </div>
+                            <div className="form-group">
+                                <label className="form-label">Codinome</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={codename}
+                                    onChange={e => setCodename(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                    <div className="form-grid">
                         <div className="form-group">
-                            <label className="form-label">Nome do Autor</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={authorName}
-                                onChange={e => setAuthorName(e.target.value)}
-                                required
+                            <label className="form-label">Bio (Breve apresentação)</label>
+                            <textarea
+                                className="form-textarea"
+                                style={{ minHeight: '100px' }}
+                                value={bio}
+                                onChange={e => setBio(e.target.value)}
                             />
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Codinome</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={codename}
-                                onChange={e => setCodename(e.target.value)}
-                                required
-                            />
+
+                        <div className="modal-footer" style={{ marginTop: '20px' }}>
+                            <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
+                            <button type="submit" className="btn-save" disabled={uploading}>
+                                {uploading ? 'Salvando...' : 'Salvar Alterações'}
+                            </button>
                         </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Bio (Breve apresentação)</label>
-                        <textarea
-                            className="form-textarea"
-                            style={{ minHeight: '100px' }}
-                            value={bio}
-                            onChange={e => setBio(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="modal-footer" style={{ marginTop: '20px' }}>
-                        <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
-                        <button type="submit" className="btn-save" disabled={uploading}>
-                            {uploading ? 'Salvando...' : 'Salvar Alterações'}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                )}
             </motion.div>
         </div>
     )
