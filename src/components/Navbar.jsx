@@ -10,6 +10,7 @@ function SettingsModal({ isOpen, onClose }) {
     const [codename, setCodename] = useState(member?.codename || '')
     const [bio, setBio] = useState(member?.bio || '')
     const [avatarPosY, setAvatarPosY] = useState(member?.avatar_pos_y || 50)
+    const [avatarScale, setAvatarScale] = useState(member?.avatar_scale || 1.0)
     const [uploading, setUploading] = useState(false)
     const [avatarFile, setAvatarFile] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState(member?.avatar_url || '')
@@ -21,6 +22,7 @@ function SettingsModal({ isOpen, onClose }) {
             setBio(member.bio || '')
             setAvatarPreview(member.avatar_url || '')
             setAvatarPosY(member.avatar_pos_y || 50)
+            setAvatarScale(member.avatar_scale || 1.0)
         }
     }, [member, isOpen])
 
@@ -71,7 +73,8 @@ function SettingsModal({ isOpen, onClose }) {
                     codename: codename,
                     bio: bio,
                     avatar_url: avatarUrl,
-                    avatar_pos_y: avatarPosY
+                    avatar_pos_y: avatarPosY,
+                    avatar_scale: avatarScale
                 })
                 .eq('id', member.id)
 
@@ -82,7 +85,8 @@ function SettingsModal({ isOpen, onClose }) {
                 codename: codename,
                 bio: bio,
                 avatar_url: avatarUrl,
-                avatar_pos_y: avatarPosY
+                avatar_pos_y: avatarPosY,
+                avatar_scale: avatarScale
             })
 
             onClose()
@@ -117,7 +121,10 @@ function SettingsModal({ isOpen, onClose }) {
                                     src={avatarPreview}
                                     alt="Preview"
                                     className="avatar-preview-img"
-                                    style={{ objectPosition: `center ${avatarPosY}%` }}
+                                    style={{
+                                        objectPosition: `center ${avatarPosY}%`,
+                                        transform: `scale(${avatarScale})`
+                                    }}
                                 />
                             ) : (
                                 <span className="avatar-preview-placeholder">👤</span>
@@ -135,15 +142,29 @@ function SettingsModal({ isOpen, onClose }) {
                         />
                         {avatarPreview && (
                             <div className="avatar-position-control">
-                                <label className="form-label">Ajuste Vertical: {avatarPosY}%</label>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={avatarPosY}
-                                    onChange={(e) => setAvatarPosY(parseInt(e.target.value))}
-                                    className="position-slider"
-                                />
+                                <div className="slider-group">
+                                    <label className="form-label">Ajuste Vertical: {avatarPosY}%</label>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={avatarPosY}
+                                        onChange={(e) => setAvatarPosY(parseInt(e.target.value))}
+                                        className="position-slider"
+                                    />
+                                </div>
+                                <div className="slider-group">
+                                    <label className="form-label">Zoom/Escala: {avatarScale}x</label>
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="3"
+                                        step="0.1"
+                                        value={avatarScale}
+                                        onChange={(e) => setAvatarScale(parseFloat(e.target.value))}
+                                        className="position-slider"
+                                    />
+                                </div>
                                 <button
                                     type="button"
                                     className="btn-remove-avatar"
