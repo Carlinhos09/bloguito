@@ -263,7 +263,12 @@ export default function Home() {
                                     <div className="member-card-bg" style={{ background: mc.bgGradient }} />
 
                                     {displayAvatar ? (
-                                        <img src={displayAvatar} alt={displayAuthor} className="member-image-destaque" />
+                                        <img
+                                            src={displayAvatar}
+                                            alt={displayAuthor}
+                                            className="member-image-destaque"
+                                            style={{ objectPosition: `center ${dbm?.avatar_pos_y ?? 50}%` }}
+                                        />
                                     ) : (
                                         <span className="member-glyph">{mc.glyph}</span>
                                     )}

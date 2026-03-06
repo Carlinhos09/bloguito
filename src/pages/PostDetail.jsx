@@ -64,8 +64,21 @@ export default function PostDetail() {
                 {post.subtitle && <p className="post-detail-subtitle">{post.subtitle}</p>}
 
                 <div className="post-detail-author">
-                    <div className="post-detail-author-avatar" style={{ background: mc.primary }}>
-                        {mc.glyph}
+                    <div className="post-detail-author-avatar" style={{ background: mc.primary, overflow: 'hidden' }}>
+                        {post.members?.avatar_url ? (
+                            <img
+                                src={post.members.avatar_url}
+                                alt={post.members.author_name}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    objectPosition: `center ${post.members.avatar_pos_y ?? 50}%`
+                                }}
+                            />
+                        ) : (
+                            mc.glyph
+                        )}
                     </div>
                     <div className="post-detail-author-info">
                         <small>{mc.codename}</small>

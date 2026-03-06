@@ -9,6 +9,7 @@ function SettingsModal({ isOpen, onClose }) {
     const [authorName, setAuthorName] = useState(member?.author_name || '')
     const [codename, setCodename] = useState(member?.codename || '')
     const [bio, setBio] = useState(member?.bio || '')
+    const [avatarPosY, setAvatarPosY] = useState(member?.avatar_pos_y || 50)
     const [uploading, setUploading] = useState(false)
     const [avatarFile, setAvatarFile] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState(member?.avatar_url || '')
@@ -19,6 +20,7 @@ function SettingsModal({ isOpen, onClose }) {
             setCodename(member.codename)
             setBio(member.bio || '')
             setAvatarPreview(member.avatar_url || '')
+            setAvatarPosY(member.avatar_pos_y || 50)
         }
     }, [member, isOpen])
 
@@ -68,7 +70,8 @@ function SettingsModal({ isOpen, onClose }) {
                     author_name: authorName,
                     codename: codename,
                     bio: bio,
-                    avatar_url: avatarUrl
+                    avatar_url: avatarUrl,
+                    avatar_pos_y: avatarPosY
                 })
                 .eq('id', member.id)
 
@@ -78,13 +81,14 @@ function SettingsModal({ isOpen, onClose }) {
                 author_name: authorName,
                 codename: codename,
                 bio: bio,
-                avatar_url: avatarUrl
+                avatar_url: avatarUrl,
+                avatar_pos_y: avatarPosY
             })
 
             onClose()
         } catch (err) {
             console.error(err)
-            alert('Erro ao salvar configurações.')
+            alert(`Erro ao salvar configurações: ${err.message || 'Erro desconhecido'}`)
         } finally {
             setUploading(false)
         }
@@ -109,7 +113,12 @@ function SettingsModal({ isOpen, onClose }) {
                     <div className="avatar-upload-section">
                         <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary }}>
                             {avatarPreview ? (
-                                <img src={avatarPreview} alt="Preview" className="avatar-preview-img" />
+                                <img
+                                    src={avatarPreview}
+                                    alt="Preview"
+                                    className="avatar-preview-img"
+                                    style={{ objectPosition: `center ${avatarPosY}%` }}
+                                />
                             ) : (
                                 <span className="avatar-preview-placeholder">👤</span>
                             )}
@@ -125,13 +134,24 @@ function SettingsModal({ isOpen, onClose }) {
                             style={{ display: 'none' }}
                         />
                         {avatarPreview && (
-                            <button
-                                type="button"
-                                className="btn-remove-avatar"
-                                onClick={handleRemoveAvatar}
-                            >
-                                Remover Foto
-                            </button>
+                            <div className="avatar-position-control">
+                                <label className="form-label">Ajuste Vertical: {avatarPosY}%</label>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={avatarPosY}
+                                    onChange={(e) => setAvatarPosY(parseInt(e.target.value))}
+                                    className="position-slider"
+                                />
+                                <button
+                                    type="button"
+                                    className="btn-remove-avatar"
+                                    onClick={handleRemoveAvatar}
+                                >
+                                    Remover Foto
+                                </button>
+                            </div>
                         )}
                         <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
                     </div>

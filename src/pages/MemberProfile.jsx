@@ -70,7 +70,21 @@ export default function MemberProfile() {
             <Navbar />
 
             <header className="profile-hero">
-                <div className="profile-hero-bg" style={{ background: mc.bgGradient }} />
+                <div className="profile-hero-bg" style={{ background: mc.bgGradient }}>
+                    {memberInfo?.avatar_url && (
+                        <img
+                            src={memberInfo.avatar_url}
+                            alt={memberInfo.author_name}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                objectPosition: `center ${memberInfo.avatar_pos_y ?? 50}%`,
+                                opacity: 0.5
+                            }}
+                        />
+                    )}
+                </div>
                 <div className="hero-scanline" />
                 <div className="profile-hero-gradient" />
 
