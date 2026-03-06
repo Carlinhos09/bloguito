@@ -10,6 +10,8 @@ function SettingsModal({ isOpen, onClose }) {
     const [authorName, setAuthorName] = useState(member?.author_name || '')
     const [codename, setCodename] = useState(member?.codename || '')
     const [bio, setBio] = useState(member?.bio || '')
+    const [academicReferences, setAcademicReferences] = useState(member?.academic_references || '')
+    const [usefulLinks, setUsefulLinks] = useState(member?.useful_links || '')
     const [uploading, setUploading] = useState(false)
     const [avatarFile, setAvatarFile] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState(member?.avatar_url || '')
@@ -24,6 +26,8 @@ function SettingsModal({ isOpen, onClose }) {
             setAuthorName(member.author_name)
             setCodename(member.codename)
             setBio(member.bio || '')
+            setAcademicReferences(member.academic_references || '')
+            setUsefulLinks(member.useful_links || '')
             setAvatarPreview(member.avatar_url || '')
         }
     }, [member, isOpen])
@@ -102,7 +106,9 @@ function SettingsModal({ isOpen, onClose }) {
                     author_name: authorName,
                     codename: codename,
                     bio: bio,
-                    avatar_url: avatarUrl
+                    avatar_url: avatarUrl,
+                    academic_references: academicReferences,
+                    useful_links: usefulLinks
                 })
                 .eq('id', member.id)
 
@@ -112,7 +118,9 @@ function SettingsModal({ isOpen, onClose }) {
                 author_name: authorName,
                 codename: codename,
                 bio: bio,
-                avatar_url: avatarUrl
+                avatar_url: avatarUrl,
+                academic_references: academicReferences,
+                useful_links: usefulLinks
             })
 
             onClose()
@@ -224,6 +232,28 @@ function SettingsModal({ isOpen, onClose }) {
                                 style={{ minHeight: '100px' }}
                                 value={bio}
                                 onChange={e => setBio(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Referências Acadêmicas (Use padrão ABNT ou de sua preferência)</label>
+                            <textarea
+                                className="form-textarea"
+                                style={{ minHeight: '120px' }}
+                                value={academicReferences}
+                                onChange={e => setAcademicReferences(e.target.value)}
+                                placeholder="Ex: KOTLER, Philip. Administração de Marketing..."
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Curadoria de Links Úteis</label>
+                            <textarea
+                                className="form-textarea"
+                                style={{ minHeight: '120px' }}
+                                value={usefulLinks}
+                                onChange={e => setUsefulLinks(e.target.value)}
+                                placeholder="Ex: Site de Tendências: https://wgsn.com"
                             />
                         </div>
 

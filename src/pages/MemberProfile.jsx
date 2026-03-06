@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import { MEMBERS_CONFIG } from './Home'
@@ -11,6 +11,7 @@ export default function MemberProfile() {
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [memberInfo, setMemberInfo] = useState(null)
+    const [activeTab, setActiveTab] = useState('posts')
 
     const mc = MEMBERS_CONFIG.find(m => m.username === username) || MEMBERS_CONFIG[0]
 
@@ -101,52 +102,113 @@ export default function MemberProfile() {
                 </div>
             </header>
 
-            <section className="profile-posts">
+            <section className="profile-content-area">
                 <div className="container">
-                    <div className="profile-posts-header reveal visible">
-                        <h2 className="profile-posts-title">Expositor de Ideias</h2>
-                        <span className="profile-posts-count">{posts.length} publicações</span>
+                    <div className="profile-tabs fade-in visible">
+                        <button
+                            className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('posts')}
+                        >
+                            Expositor de Ideias
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'links' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('links')}
+                        >
+                            Links Úteis
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'references' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('references')}
+                        >
+                            Referências Acadêmicas
+                        </button>
                     </div>
 
-                    {loading ? (
-                        <div className="spinner" style={{ margin: '60px auto' }} />
-                    ) : posts.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="empty-state-icon">☁️</div>
-                            <p className="empty-state-text">
-                                Nenhuma publicação encontrada por aqui ainda.<br />
-                                A neblina está espessa.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="profile-post-list">
-                            {posts.map((post, i) => (
-                                <motion.div
-                                    key={post.id}
-                                    className="profile-post-item"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.05 }}
-                                    onClick={() => navigate(`/post/${post.id}`)}
-                                >
-                                    <div className="profile-post-thumb">
-                                        {post.cover_image_url ? (
-                                            <img src={post.cover_image_url} alt={post.title} />
-                                        ) : mc.glyph}
+                    <div className="profile-tab-content fade-in visible">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {activeTab === 'posts' && (
+                                    <>
+                                        <div className="profile-posts-header">
+                                            <span className="profile-posts-count">{posts.length} publicações na neblina</span>
+                                        </div>
+                                        {loading ? (
+                                            <div className="spinner" style={{ margin: '60px auto' }} />
+                                        ) : posts.length === 0 ? (
+                                            <div className="empty-state">
+                                                <div className="empty-state-icon">☁️</div>
+                                                <p className="empty-state-text">
+                                                    Nenhuma publicação encontrada por aqui ainda.<br />
+                                                    A neblina está espessa.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="profile-post-list">
+                                                {posts.map((post, i) => (
+                                                    <motion.div
+                                                        key={post.id}
+                                                        className="profile-post-item"
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        whileInView={{ opacity: 1, x: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ delay: i * 0.05 }}
+                                                        onClick={() => navigate(`/post/${post.id}`)}
+                                                    >
+                                                        <div className="profile-post-thumb">
+                                                            {post.cover_image_url ? (
+                                                                <img src={post.cover_image_url} alt={post.title} />
+                                                            ) : mc.glyph}
+                                                        </div>
+                                                        <div className="profile-post-info">
+                                                            <div className="profile-post-theme">{post.weekly_theme || 'Sem Tema'}</div>
+                                                            <h3 className="profile-post-title">{post.title}</h3>
+                                                            <p className="profile-post-subtitle">{post.subtitle}</p>
+                                                        </div>
+                                                        <div className="profile-post-date">
+                                                            {new Date(post.created_at).toLocaleDateString('pt-BR')}
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {activeTab === 'links' && (
+                                    <div className="resource-content">
+                                        <h3 className="resource-title">Curadoria Espacial</h3>
+                                        <div className="resource-text">
+                                            {memberInfo?.useful_links ? (
+                                                memberInfo.useful_links
+                                            ) : (
+                                                <span className="text-muted">Nenhum link catalogado ainda.</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="profile-post-info">
-                                        <div className="profile-post-theme">{post.weekly_theme || 'Sem Tema'}</div>
-                                        <h3 className="profile-post-title">{post.title}</h3>
-                                        <p className="profile-post-subtitle">{post.subtitle}</p>
+                                )}
+
+                                {activeTab === 'references' && (
+                                    <div className="resource-content">
+                                        <h3 className="resource-title">Base de Dados e Pesquisa</h3>
+                                        <div className="resource-text">
+                                            {memberInfo?.academic_references ? (
+                                                memberInfo.academic_references
+                                            ) : (
+                                                <span className="text-muted">Nenhuma referência catalogada ainda.</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="profile-post-date">
-                                        {new Date(post.created_at).toLocaleDateString('pt-BR')}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
                 </div>
             </section>
 
