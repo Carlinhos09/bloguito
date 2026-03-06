@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import Cropper from 'react-easy-crop'
@@ -20,6 +21,11 @@ function SettingsModal({ isOpen, onClose }) {
     const [zoom, setZoom] = useState(1)
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
     const [isCropping, setIsCropping] = useState(false)
+    const [aboutText, setAboutText] = useState(member?.about_text || '')
+    const [aboutImageFile, setAboutImageFile] = useState(null)
+    const [aboutImagePreview, setAboutImagePreview] = useState(member?.about_image_url || '')
+    const [activeTab, setActiveTab] = useState('profile')
+    const [croppingType, setCroppingType] = useState(null)
 
     useEffect(() => {
         if (member) {
@@ -29,16 +35,19 @@ function SettingsModal({ isOpen, onClose }) {
             setAcademicReferences(member.academic_references || '')
             setUsefulLinks(member.useful_links || '')
             setAvatarPreview(member.avatar_url || '')
+            setAboutText(member.about_text || '')
+            setAboutImagePreview(member.about_image_url || '')
         }
     }, [member, isOpen])
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e, type = 'avatar') => {
         const file = e.target.files[0]
         if (file) {
             const reader = new FileReader()
             reader.onload = () => {
                 setImageSrc(reader.result)
                 setIsCropping(true)
+                setCroppingType(type)
                 setCrop({ x: 0, y: 0 })
                 setZoom(1)
             }
@@ -53,10 +62,16 @@ function SettingsModal({ isOpen, onClose }) {
     const handleConfirmCrop = async () => {
         try {
             const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels)
-            setAvatarFile(croppedImageBlob)
-            setAvatarPreview(URL.createObjectURL(croppedImageBlob))
+            if (croppingType === 'avatar') {
+                setAvatarFile(croppedImageBlob)
+                setAvatarPreview(URL.createObjectURL(croppedImageBlob))
+            } else {
+                setAboutImageFile(croppedImageBlob)
+                setAboutImagePreview(URL.createObjectURL(croppedImageBlob))
+            }
             setIsCropping(false)
             setImageSrc(null)
+            setCroppingType(null)
         } catch (e) {
             console.error(e)
             alert("Erro ao recortar imagem")
@@ -66,11 +81,17 @@ function SettingsModal({ isOpen, onClose }) {
     const handleCancelCrop = () => {
         setIsCropping(false)
         setImageSrc(null)
+        setCroppingType(null)
     }
 
     const handleRemoveAvatar = () => {
         setAvatarFile(null)
         setAvatarPreview('')
+    }
+
+    const handleRemoveAboutImage = () => {
+        setAboutImageFile(null)
+        setAboutImagePreview('')
     }
 
     const handleSave = async (e) => {
@@ -81,10 +102,11 @@ function SettingsModal({ isOpen, onClose }) {
             // Se o preview estiver vazio, o usuário removeu a foto.
             // Caso contrário, mantemos a URL atual (ou a nova se houver upload).
             let avatarUrl = avatarPreview === '' ? '' : (member.avatar_url || '')
+            let aboutUrl = aboutImagePreview === '' ? '' : (member.about_image_url || '')
 
             if (avatarFile) {
-                const fileExt = avatarFile.name.split('.').pop()
-                const fileName = `${member.id}-${Math.random()}.${fileExt}`
+                const fileExt = avatarFile.name ? avatarFile.name.split('.').pop() : 'jpg'
+                const fileName = `avatar-${member.id}-${Math.random()}.${fileExt}`
                 const filePath = `${fileName}`
 
                 const { error: uploadError } = await supabase.storage
@@ -100,28 +122,43 @@ function SettingsModal({ isOpen, onClose }) {
                 avatarUrl = publicUrl
             }
 
-            const { error: updateError } = await supabase
-                .from('members')
-                .update({
-                    author_name: authorName,
-                    codename: codename,
-                    bio: bio,
-                    avatar_url: avatarUrl,
-                    academic_references: academicReferences,
-                    useful_links: usefulLinks
-                })
-                .eq('id', member.id)
+            if (aboutImageFile) {
+                const fileExt = aboutImageFile.name ? aboutImageFile.name.split('.').pop() : 'jpg'
+                const fileName = `about-${member.id}-${Math.random()}.${fileExt}`
+                const filePath = `${fileName}`
 
-            if (updateError) throw updateError
+                const { error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(filePath, aboutImageFile)
 
-            updateMember({
+                if (uploadError) throw uploadError
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(filePath)
+
+                aboutUrl = publicUrl
+            }
+
+            const updateData = {
                 author_name: authorName,
                 codename: codename,
                 bio: bio,
                 avatar_url: avatarUrl,
                 academic_references: academicReferences,
-                useful_links: usefulLinks
-            })
+                useful_links: usefulLinks,
+                about_text: aboutText,
+                about_image_url: aboutUrl
+            }
+
+            const { error: updateError } = await supabase
+                .from('members')
+                .update(updateData)
+                .eq('id', member.id)
+
+            if (updateError) throw updateError
+
+            updateMember(updateData)
 
             onClose()
         } catch (err) {
@@ -149,7 +186,7 @@ function SettingsModal({ isOpen, onClose }) {
 
                 {isCropping ? (
                     <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', height: '500px' }}>
-                        <div style={{ position: 'relative', flex: 1, background: '#111', borderRadius: '8px', overflow: 'hidden' }}>
+                        <div style={{ position: 'relative', flex: 1, background: 'var(--bg-surface)', borderRadius: '8px', overflow: 'hidden' }}>
                             <Cropper
                                 image={imageSrc}
                                 crop={crop}
@@ -167,94 +204,132 @@ function SettingsModal({ isOpen, onClose }) {
                     </div>
                 ) : (
                     <form onSubmit={handleSave} className="modal-body">
-                        <div className="avatar-upload-section">
-                            <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary }}>
-                                {avatarPreview ? (
-                                    <img
-                                        src={avatarPreview}
-                                        alt="Preview"
-                                        className="avatar-preview-img"
-                                    />
-                                ) : (
-                                    <span className="avatar-preview-placeholder">👤</span>
+                        <div className="settings-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
+                            <button type="button" onClick={() => setActiveTab('profile')} className={`btn-tab ${activeTab === 'profile' ? 'active' : ''}`} style={{ background: activeTab === 'profile' ? 'var(--bg-card-hover)' : 'transparent', color: activeTab === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', padding: '8px 16px', borderRadius: '4px', fontWeight: '600' }}>Perfil Básico</button>
+                            <button type="button" onClick={() => setActiveTab('about')} className={`btn-tab ${activeTab === 'about' ? 'active' : ''}`} style={{ background: activeTab === 'about' ? 'var(--bg-card-hover)' : 'transparent', color: activeTab === 'about' ? 'var(--text-primary)' : 'var(--text-secondary)', padding: '8px 16px', borderRadius: '4px', fontWeight: '600' }}>Quem Somos Nós</button>
+                        </div>
+
+                        <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
+                            <div className="avatar-upload-section">
+                                <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary }}>
+                                    {avatarPreview ? (
+                                        <img
+                                            src={avatarPreview}
+                                            alt="Preview"
+                                            className="avatar-preview-img"
+                                        />
+                                    ) : (
+                                        <span className="avatar-preview-placeholder">👤</span>
+                                    )}
+                                    <label htmlFor="avatar-input" className="avatar-upload-label">
+                                        📷
+                                    </label>
+                                </div>
+                                <input
+                                    id="avatar-input"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e, 'avatar')}
+                                    style={{ display: 'none' }}
+                                />
+                                {avatarPreview && (
+                                    <button
+                                        type="button"
+                                        className="btn-remove-avatar"
+                                        style={{ marginTop: '16px', display: 'block', width: '100%' }}
+                                        onClick={handleRemoveAvatar}
+                                    >
+                                        Remover Foto
+                                    </button>
                                 )}
-                                <label htmlFor="avatar-input" className="avatar-upload-label">
-                                    📷
-                                </label>
+                                <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
                             </div>
-                            <input
-                                id="avatar-input"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
-                            />
-                            {avatarPreview && (
-                                <button
-                                    type="button"
-                                    className="btn-remove-avatar"
-                                    style={{ marginTop: '16px', display: 'block', width: '100%' }}
-                                    onClick={handleRemoveAvatar}
-                                >
-                                    Remover Foto
-                                </button>
-                            )}
-                            <p className="avatar-help">Clique na câmera para mudar sua foto de destaque.</p>
-                        </div>
 
-                        <div className="form-grid">
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label className="form-label">Nome do Autor</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        value={authorName}
+                                        onChange={e => setAuthorName(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Codinome</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        value={codename}
+                                        onChange={e => setCodename(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
                             <div className="form-group">
-                                <label className="form-label">Nome do Autor</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={authorName}
-                                    onChange={e => setAuthorName(e.target.value)}
-                                    required
+                                <label className="form-label">Bio (Breve apresentação)</label>
+                                <textarea
+                                    className="form-textarea"
+                                    style={{ minHeight: '100px' }}
+                                    value={bio}
+                                    onChange={e => setBio(e.target.value)}
                                 />
                             </div>
+
                             <div className="form-group">
-                                <label className="form-label">Codinome</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={codename}
-                                    onChange={e => setCodename(e.target.value)}
-                                    required
+                                <label className="form-label">Referências Acadêmicas (Use padrão ABNT ou de sua preferência)</label>
+                                <textarea
+                                    className="form-textarea"
+                                    style={{ minHeight: '120px' }}
+                                    value={academicReferences}
+                                    onChange={e => setAcademicReferences(e.target.value)}
+                                    placeholder="Ex: KOTLER, Philip. Administração de Marketing..."
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Curadoria de Links Úteis</label>
+                                <textarea
+                                    className="form-textarea"
+                                    style={{ minHeight: '120px' }}
+                                    value={usefulLinks}
+                                    onChange={e => setUsefulLinks(e.target.value)}
+                                    placeholder="Ex: Site de Tendências: https://wgsn.com"
                                 />
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Bio (Breve apresentação)</label>
-                            <textarea
-                                className="form-textarea"
-                                style={{ minHeight: '100px' }}
-                                value={bio}
-                                onChange={e => setBio(e.target.value)}
-                            />
-                        </div>
+                        <div style={{ display: activeTab === 'about' ? 'block' : 'none' }}>
+                            <div className="avatar-upload-section">
+                                <div className="avatar-preview-container" style={{ '--member-color': member?.color_primary, borderRadius: '8px', width: '200px', height: '200px', margin: '0 auto' }}>
+                                    {aboutImagePreview ? (
+                                        <img src={aboutImagePreview} alt="Preview" className="avatar-preview-img" style={{ borderRadius: '8px', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span className="avatar-preview-placeholder">📸</span>
+                                    )}
+                                    <label htmlFor="about-img-input" className="avatar-upload-label" style={{ borderRadius: '8px' }}>📷</label>
+                                </div>
+                                <input id="about-img-input" type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'about')} style={{ display: 'none' }} />
+                                {aboutImagePreview && (
+                                    <button type="button" className="btn-remove-avatar" style={{ marginTop: '16px', display: 'block', width: '200px', margin: '16px auto 0' }} onClick={handleRemoveAboutImage}>
+                                        Remover Foto
+                                    </button>
+                                )}
+                                <p className="avatar-help">Uma foto que exale beleza para a seção "Quem Somos Nós". Formato quadrado.</p>
+                            </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Referências Acadêmicas (Use padrão ABNT ou de sua preferência)</label>
-                            <textarea
-                                className="form-textarea"
-                                style={{ minHeight: '120px' }}
-                                value={academicReferences}
-                                onChange={e => setAcademicReferences(e.target.value)}
-                                placeholder="Ex: KOTLER, Philip. Administração de Marketing..."
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Curadoria de Links Úteis</label>
-                            <textarea
-                                className="form-textarea"
-                                style={{ minHeight: '120px' }}
-                                value={usefulLinks}
-                                onChange={e => setUsefulLinks(e.target.value)}
-                                placeholder="Ex: Site de Tendências: https://wgsn.com"
-                            />
+                            <div className="form-group" style={{ marginTop: '24px' }}>
+                                <label className="form-label">Relato Emocionante (Quem é você?)</label>
+                                <textarea
+                                    className="form-textarea"
+                                    style={{ minHeight: '280px' }}
+                                    value={aboutText}
+                                    onChange={e => setAboutText(e.target.value)}
+                                    placeholder="Escreva sua história, de onde surgiu o fogo para escrever no blog..."
+                                />
+                            </div>
                         </div>
 
                         <div className="modal-footer" style={{ marginTop: '20px' }}>
@@ -276,6 +351,7 @@ export default function Navbar() {
     const [userMenuOpen, setUserMenuOpen] = useState(false)
     const [settingsModalOpen, setSettingsModalOpen] = useState(false)
     const { member, logout } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
     const userMenuRef = useRef(null)
 
@@ -326,12 +402,12 @@ export default function Navbar() {
 
                         <div className={`navbar-links ${menuOpen ? 'active' : ''}`}>
                             <a
-                                href="/#members"
+                                href="/#about-us"
                                 className="navbar-link"
                                 onClick={(e) => {
                                     if (window.location.pathname === '/') {
                                         e.preventDefault();
-                                        const el = document.getElementById('members');
+                                        const el = document.getElementById('about-us');
                                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                                     }
                                     setMenuOpen(false);
@@ -343,6 +419,25 @@ export default function Navbar() {
                             <Link to="/member/eduardo" className="navbar-link" onClick={() => setMenuOpen(false)}>Entre Frames</Link>
                             <Link to="/member/sophia" className="navbar-link" onClick={() => setMenuOpen(false)}>Drop</Link>
                             <Link to="/member/clarisse" className="navbar-link" onClick={() => setMenuOpen(false)}>Episódio Zero</Link>
+
+                            <button 
+                                onClick={toggleTheme} 
+                                className="theme-toggle-btn" 
+                                aria-label="Toggle Theme"
+                                title={`Mudar para modo ${theme === 'light' ? 'escuro' : 'claro'}`}
+                            >
+                                <motion.div
+                                    initial={false}
+                                    animate={{ 
+                                        rotate: theme === 'light' ? 90 : 0, 
+                                        scale: theme === 'light' ? 1.1 : 1 
+                                    }}
+                                    transition={{ duration: 0.5, ease: "easeOut" }}
+                                    className="theme-icon-wrapper"
+                                >
+                                    {theme === 'light' ? '☀️' : '🌙'}
+                                </motion.div>
+                            </button>
 
                             {member ? (
                                 <div className="user-menu-container" ref={userMenuRef}>

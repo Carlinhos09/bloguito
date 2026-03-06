@@ -9,7 +9,7 @@ const MEMBERS_CONFIG = [
         username: 'triz',
         codename: 'PLAYER TEMPESTADE',
         column: 'MODO CRIATIVO',
-        author: 'Triz',
+        author: 'Beatriz',
         niche: 'Jogos',
         glyph: '🎮',
         primary: '#7c3aed',
@@ -165,7 +165,7 @@ export default function Home() {
                         transition={{ delay: 0.7, duration: 0.6 }}
                     >
                         <button className="btn-primary" onClick={() => document.getElementById('members').scrollIntoView({ behavior: 'smooth' })}>
-                            <span>Quem somos nós ↓</span>
+                            <span>Destaques ↓</span>
                         </button>
                         <button className="btn-secondary" onClick={() => document.getElementById('posts').scrollIntoView({ behavior: 'smooth' })}>
                             Últimos Posts
@@ -218,6 +218,68 @@ export default function Home() {
                                 <div className="stat-label">Nível de Caos</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* QUEM SOMOS NÓS */}
+            <section className="about-us-section" id="about-us">
+                <div className="container">
+                    <div className="section-header reveal">
+                        <span className="section-label">Quem Somos Nós</span>
+                        <h2 className="section-title">
+                            As mentes por trás<br />
+                            <span className="gradient-text">da Tempestade</span>
+                        </h2>
+                    </div>
+
+                    <div className="about-us-grid">
+                        {MEMBERS_CONFIG.map((mc, index) => {
+                            const dbm = dbMembers.find(d => d.username === mc.username)
+                            const displayAuthor = dbm?.author_name || mc.author
+                            const displayCodename = dbm?.codename || mc.codename
+                            const aboutText = dbm?.about_text || 'Uma mente criativa movida pelo caos da cultura pop. Relato emocionante em construção...'
+                            const aboutImage = dbm?.about_image_url || null
+                            const isEven = index % 2 === 0
+
+                            return (
+                                <motion.div 
+                                    key={mc.username} 
+                                    className={`about-us-row reveal ${isEven ? 'row-even' : 'row-odd'}`}
+                                    initial={{ opacity: 0, y: 50 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: '-60px' }}
+                                    transition={{ duration: 0.8 }}
+                                >
+                                    <div className="about-us-image-col">
+                                        <div className="about-us-image-wrapper" style={{ 
+                                            '--member-glow': mc.glow,
+                                            '--member-primary': mc.primary,
+                                            boxShadow: `0 0 40px ${mc.glow}`
+                                        }}>
+                                            {aboutImage ? (
+                                                <img src={aboutImage} alt={displayAuthor} className="about-us-img" />
+                                            ) : (
+                                                <div className="about-us-img-placeholder" style={{ background: mc.cardGradient }}>
+                                                    <span className="about-us-glyph" style={{ color: mc.primary }}>{mc.glyph}</span>
+                                                    <span className="about-us-placeholder-text">Sua foto foda aqui</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="about-us-text-col">
+                                        <div className="about-us-column-tag" style={{ color: mc.secondary, border: `1px solid ${mc.primary}33`, background: `${mc.primary}11` }}>
+                                            {mc.column}
+                                        </div>
+                                        <h3 className="about-us-name">{displayAuthor}</h3>
+                                        <h4 className="about-us-codename" style={{ WebkitTextStroke: `1px ${mc.primary}`, color: 'transparent' }}>
+                                            {displayCodename}
+                                        </h4>
+                                        <p className="about-us-bio">{aboutText}</p>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
                     </div>
                 </div>
             </section>
