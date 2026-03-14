@@ -2109,19 +2109,23 @@ textarea {
 
   .user-avatar-btn {
     width: 100%;
-    height: 50px;
-    border-radius: var(--radius-sm);
+    height: 60px;
+    border-radius: var(--radius-md);
     justify-content: flex-start;
     padding: 0 16px;
     border: 1px solid var(--border);
+    background: var(--bg-card-hover);
+    margin-top: 10px;
+    margin-bottom: 20px;
   }
 
   .user-avatar-btn::after {
-    content: 'Sua Contra';
+    content: 'SUA CONTA';
     margin-left: 12px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
   }
 
   .user-dropdown {
@@ -2646,6 +2650,14 @@ textarea {
   .about-us-image-wrapper {
     height: 300px;
   }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .about-us-name {
+    font-size: 2.5rem;
+  }
 }
 
 /* ================================
@@ -2734,7 +2746,14 @@ textarea {
   }
 
   .hero-title {
-    font-size: 3.5rem;
+    font-size: clamp(2.5rem, 12vw, 4rem);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .hero-title .gradient-text {
+    font-size: 0.6em !important;
+    margin-top: 4px !important;
   }
 
   .about-inner {

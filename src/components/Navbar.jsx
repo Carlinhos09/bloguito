@@ -420,17 +420,17 @@ export default function Navbar() {
                             <Link to="/member/sophia" className="navbar-link" onClick={() => setMenuOpen(false)}>Drop</Link>
                             <Link to="/member/clarisse" className="navbar-link" onClick={() => setMenuOpen(false)}>Episódio Zero</Link>
 
-                            <button 
-                                onClick={toggleTheme} 
-                                className="theme-toggle-btn" 
+                            <button
+                                onClick={toggleTheme}
+                                className="theme-toggle-btn"
                                 aria-label="Toggle Theme"
                                 title={`Mudar para modo ${theme === 'light' ? 'escuro' : 'claro'}`}
                             >
                                 <motion.div
                                     initial={false}
-                                    animate={{ 
-                                        rotate: theme === 'light' ? 90 : 0, 
-                                        scale: theme === 'light' ? 1.1 : 1 
+                                    animate={{
+                                        rotate: theme === 'light' ? 90 : 0,
+                                        scale: theme === 'light' ? 1.1 : 1
                                     }}
                                     transition={{ duration: 0.5, ease: "easeOut" }}
                                     className="theme-icon-wrapper"
@@ -449,11 +449,12 @@ export default function Navbar() {
                                         <span className="avatar-icon">👤</span>
                                     </button>
 
+                                    {/* Mobile behavior: the dropdown is static in CSS @media 768px, but JS controls visibility via userMenuOpen. Let's make it always open or more integrated on mobile. */}
                                     <AnimatePresence>
-                                        {userMenuOpen && (
+                                        {(userMenuOpen || window.innerWidth <= 768) && (
                                             <motion.div
                                                 className="user-dropdown"
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                initial={window.innerWidth > 768 ? { opacity: 0, y: 10, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 transition={{ duration: 0.2 }}
