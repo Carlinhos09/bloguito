@@ -2660,6 +2660,10 @@ textarea {
   }
 }
 
+.logout-mobile-only {
+  display: none;
+}
+
 /* ================================
    RESPONSIVE
 ================================ */
@@ -2739,6 +2743,17 @@ textarea {
     background: var(--member-primary, #7c3aed);
     text-align: center;
     border-radius: var(--radius-sm);
+  }
+
+  .logout-mobile-only {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    color: #fca5a5 !important;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    font-weight: 700;
   }
 
   .hero-content {

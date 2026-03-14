@@ -479,6 +479,14 @@ export default function Navbar() {
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
+                                    {/* Link de Sair (Exclusivo para Mobile) */}
+                                    <button
+                                        className="navbar-link logout-mobile-only"
+                                        onClick={handleLogout}
+                                        style={{ color: '#fca5a5', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                                    >
+                                        <span className="item-icon">🚪</span> Sair
+                                    </button>
                                 </div>
                             ) : (
                                 <Link to="/login" className="navbar-link admin-btn" onClick={() => setMenuOpen(false)}>Admin</Link>
