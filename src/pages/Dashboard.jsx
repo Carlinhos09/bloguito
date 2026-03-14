@@ -152,14 +152,13 @@ export default function Dashboard() {
                 <div className="container">
                     <div className="dashboard-header-inner">
                         <div>
-                            <div className="dashboard-welcome">Bem-vindo de volta, {member?.author_name}</div>
+                            <div className="dashboard-welcome">Central de Posts | Bem-vindo, {member?.author_name}</div>
                             <h1 className="dashboard-title">{member?.codename}</h1>
                         </div>
                         <div className="dashboard-actions">
                             <button className="btn-create" onClick={() => handleOpenModal()}>
                                 <span>+ Novo Post</span>
                             </button>
-                            <button className="btn-logout" onClick={logout}>Sair</button>
                         </div>
                     </div>
                 </div>
@@ -247,7 +246,6 @@ export default function Dashboard() {
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Título chamativo"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         required
@@ -259,7 +257,6 @@ export default function Dashboard() {
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Uma pequena introdução..."
                                         value={subtitle}
                                         onChange={(e) => setSubtitle(e.target.value)}
                                     />
@@ -271,7 +268,6 @@ export default function Dashboard() {
                                         <input
                                             type="text"
                                             className="form-input"
-                                            placeholder="Ex: Cyberpunk"
                                             value={weeklyTheme}
                                             onChange={(e) => setWeeklyTheme(e.target.value)}
                                         />
@@ -281,7 +277,6 @@ export default function Dashboard() {
                                         <input
                                             type="url"
                                             className="form-input"
-                                            placeholder="https://..."
                                             value={coverImageUrl}
                                             onChange={(e) => setCoverImageUrl(e.target.value)}
                                         />
@@ -292,7 +287,6 @@ export default function Dashboard() {
                                     <label className="form-label">Conteúdo do Post (Markdown em breve)</label>
                                     <textarea
                                         className="form-textarea"
-                                        placeholder="Escreva sua tempestade aqui..."
                                         value={content}
                                         onChange={(e) => setContent(e.target.value)}
                                         required

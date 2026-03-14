@@ -285,7 +285,6 @@ function SettingsModal({ isOpen, onClose }) {
                                     style={{ minHeight: '120px' }}
                                     value={academicReferences}
                                     onChange={e => setAcademicReferences(e.target.value)}
-                                    placeholder="Ex: KOTLER, Philip. Administração de Marketing..."
                                 />
                             </div>
 
@@ -296,7 +295,6 @@ function SettingsModal({ isOpen, onClose }) {
                                     style={{ minHeight: '120px' }}
                                     value={usefulLinks}
                                     onChange={e => setUsefulLinks(e.target.value)}
-                                    placeholder="Ex: Site de Tendências: https://wgsn.com"
                                 />
                             </div>
                         </div>
@@ -327,7 +325,6 @@ function SettingsModal({ isOpen, onClose }) {
                                     style={{ minHeight: '280px' }}
                                     value={aboutText}
                                     onChange={e => setAboutText(e.target.value)}
-                                    placeholder="Escreva sua história, de onde surgiu o fogo para escrever no blog..."
                                 />
                             </div>
                         </div>
@@ -467,7 +464,7 @@ export default function Navbar() {
                                                 </div>
                                                 <div className="dropdown-divider" />
                                                 <Link to="/dashboard" className="dropdown-item" onClick={() => { setUserMenuOpen(false); setMenuOpen(false) }}>
-                                                    <span className="item-icon">⚡</span> Dashboard
+                                                    <span className="item-icon">⚡</span> Central de Posts
                                                 </Link>
                                                 <button className="dropdown-item" onClick={() => { setSettingsModalOpen(true); setUserMenuOpen(false) }}>
                                                     <span className="item-icon">⚙️</span> Configurações
@@ -479,14 +476,6 @@ export default function Navbar() {
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
-                                    {/* Link de Sair (Exclusivo para Mobile) */}
-                                    <button
-                                        className="navbar-link logout-mobile-only"
-                                        onClick={handleLogout}
-                                        style={{ color: '#fca5a5', borderColor: 'rgba(239, 68, 68, 0.2)' }}
-                                    >
-                                        <span className="item-icon">🚪</span> Sair
-                                    </button>
                                 </div>
                             ) : (
                                 <Link to="/login" className="navbar-link admin-btn" onClick={() => setMenuOpen(false)}>Admin</Link>

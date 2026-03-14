@@ -1857,22 +1857,6 @@ textarea {
   transform: translateY(-1px);
 }
 
-.btn-logout {
-  padding: 12px 20px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  transition: var(--transition);
-  letter-spacing: 0.05em;
-}
-
-.btn-logout:hover {
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-  background: rgba(239, 68, 68, 0.05);
-}
 
 .dashboard-posts {
   padding-bottom: 100px;
@@ -2120,7 +2104,7 @@ textarea {
   }
 
   .user-avatar-btn::after {
-    content: 'SUA CONTA';
+    content: 'CENTRAL DE POSTS';
     margin-left: 12px;
     font-size: 0.8rem;
     font-weight: 800;
@@ -2660,9 +2644,6 @@ textarea {
   }
 }
 
-.logout-mobile-only {
-  display: none;
-}
 
 /* ================================
    RESPONSIVE
@@ -2745,16 +2726,6 @@ textarea {
     border-radius: var(--radius-sm);
   }
 
-  .logout-mobile-only {
-    display: flex !important;
-    align-items: center;
-    gap: 12px;
-    margin-top: auto;
-    color: #fca5a5 !important;
-    background: rgba(239, 68, 68, 0.05);
-    border: 1px solid rgba(239, 68, 68, 0.1);
-    font-weight: 700;
-  }
 
   .hero-content {
     padding-top: 120px;
