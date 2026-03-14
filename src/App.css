@@ -2104,7 +2104,7 @@ textarea {
   }
 
   .user-avatar-btn::after {
-    content: 'CENTRAL DE POSTS';
+    content: 'PERFIL';
     margin-left: 12px;
     font-size: 0.8rem;
     font-weight: 800;
