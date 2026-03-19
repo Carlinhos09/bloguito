@@ -308,12 +308,12 @@ export default function Dashboard() {
                                         onChange={(e) => setPublished(e.target.checked)}
                                     />
                                     <span className="checkbox-label" style={{ fontWeight: 600 }}>
-                                        Publicado (visível no blog conforme a data)
+                                        Marque a flag para publicar um post agora ou agendar
                                     </span>
                                 </label>
 
                                 <div className="form-group" style={{ marginTop: '16px', opacity: published ? 1 : 0.5 }}>
-                                    <label className="form-label">Data de Publicação Programada</label>
+                                    <label className="form-label">Data de Publicação</label>
                                     <input
                                         type="datetime-local"
                                         className="form-input"
