@@ -412,7 +412,7 @@ export default function Home() {
                                                 >
                                                     {post.members?.column_name || mc.column}
                                                 </span>
-                                                <span className="post-card-date">{formatDate(post.created_at)}</span>
+                                                <span className="post-card-date">{formatDate(post.published_at || post.created_at)}</span>
                                             </div>
                                             <h3 className="post-card-title">{post.title}</h3>
                                             {post.subtitle && (

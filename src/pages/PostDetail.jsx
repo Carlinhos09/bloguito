@@ -56,7 +56,7 @@ export default function PostDetail() {
                         🌩 {post.weekly_theme || 'Destaque'}
                     </span>
                     <span className="post-detail-date">
-                        {new Date(post.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </span>
                 </div>
 

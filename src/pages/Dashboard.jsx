@@ -13,6 +13,14 @@ export default function Dashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingPost, setEditingPost] = useState(null)
 
+    // Helper para converter data para o formato datetime-local (considerando fuso horário)
+    const formatToLocalISO = (date) => {
+        if (!date) return ''
+        const d = new Date(date)
+        const offset = d.getTimezoneOffset() * 60000
+        return new Date(d.getTime() - offset).toISOString().slice(0, 16)
+    }
+
     // Form State
     const [title, setTitle] = useState('')
     const [subtitle, setSubtitle] = useState('')
@@ -20,7 +28,7 @@ export default function Dashboard() {
     const [coverImageUrl, setCoverImageUrl] = useState('')
     const [weeklyTheme, setWeeklyTheme] = useState('')
     const [published, setPublished] = useState(true)
-    const [publishedAt, setPublishedAt] = useState(new Date().toISOString().slice(0, 16))
+    const [publishedAt, setPublishedAt] = useState(formatToLocalISO(new Date()))
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
@@ -54,7 +62,7 @@ export default function Dashboard() {
             setCoverImageUrl(post.cover_image_url || '')
             setWeeklyTheme(post.weekly_theme || '')
             setPublished(post.published ?? true)
-            setPublishedAt(post.published_at ? new Date(post.published_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16))
+            setPublishedAt(post.published_at ? formatToLocalISO(post.published_at) : formatToLocalISO(new Date()))
         } else {
             setEditingPost(null)
             setTitle('')
@@ -63,7 +71,7 @@ export default function Dashboard() {
             setCoverImageUrl('')
             setWeeklyTheme('')
             setPublished(true)
-            setPublishedAt(new Date().toISOString().slice(0, 16))
+            setPublishedAt(formatToLocalISO(new Date()))
         }
         setIsModalOpen(true)
     }
@@ -85,7 +93,7 @@ export default function Dashboard() {
             cover_image_url: coverImageUrl,
             weekly_theme: weeklyTheme,
             published,
-            published_at: publishedAt,
+            published_at: new Date(publishedAt).toISOString(),
             updated_at: new Date()
         }
 
@@ -299,7 +307,9 @@ export default function Dashboard() {
                                         checked={published}
                                         onChange={(e) => setPublished(e.target.checked)}
                                     />
-                                    <span className="checkbox-label">Publicar imediatamente</span>
+                                    <span className="checkbox-label" style={{ fontWeight: 600 }}>
+                                        Publicado (visível no blog conforme a data)
+                                    </span>
                                 </label>
 
                                 <div className="form-group" style={{ marginTop: '16px', opacity: published ? 1 : 0.5 }}>

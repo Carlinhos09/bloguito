@@ -173,7 +173,7 @@ export default function MemberProfile() {
                                                             <p className="profile-post-subtitle">{post.subtitle}</p>
                                                         </div>
                                                         <div className="profile-post-date">
-                                                            {new Date(post.created_at).toLocaleDateString('pt-BR')}
+                                                            {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR')}
                                                         </div>
                                                     </motion.div>
                                                 ))}
